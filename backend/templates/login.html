@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>🔑 로그인 | OCR Book Collection</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Noto Sans KR", sans-serif;
+    }
+
+    body {
+      display: flex;
+      min-height: 100vh;
+      background: linear-gradient(120deg, #dbeafe, #eff6ff);
+    }
+
+    .container {
+      display: flex;
+      flex: 1;
+      max-width: 1100px;
+      margin: auto;
+      background: white;
+      border-radius: 18px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+
+    /* ---------- 왼쪽 소개 영역 ---------- */
+    .left {
+      flex: 1;
+      background: linear-gradient(135deg, #007bff, #0056b3);
+      color: white;
+      padding: 60px 50px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      text-align: left;
+    }
+
+    .left h1 {
+      font-size: 32px;
+      margin-bottom: 20px;
+    }
+
+    .left p {
+      font-size: 16px;
+      line-height: 1.6;
+      color: #e5e7eb;
+      margin-bottom: 30px;
+    }
+
+    .left ul {
+      list-style: none;
+      padding-left: 0;
+      font-size: 15px;
+      line-height: 1.8;
+    }
+
+    .left ul li::before {
+      content: "✅ ";
+    }
+
+    /* ---------- 오른쪽 로그인 영역 ---------- */
+    .right {
+      flex: 0.9;
+      padding: 60px 50px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .right h2 {
+      font-size: 26px;
+      color: #1f2937;
+      margin-bottom: 30px;
+    }
+
+    .right form {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+    }
+
+    .right input {
+      width: 80%;
+      padding: 12px;
+      margin: 10px 0;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 15px;
+    }
+
+    .right button {
+      width: 80%;
+      padding: 12px;
+      background-color: #007bff;
+      color: white;
+      font-size: 15px;
+      border: none;
+      border-radius: 8px;
+      margin-top: 20px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .right button:hover {
+      background-color: #0056b3;
+    }
+
+    .footer-text {
+      margin-top: 25px;
+      font-size: 14px;
+      color: #555;
+    }
+
+    .footer-text a {
+      color: #007bff;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .footer-text a:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 900px) {
+      .container {
+        flex-direction: column;
+        max-width: 95%;
+      }
+      .left, .right {
+        flex: none;
+        padding: 40px 25px;
+      }
+      .right input, .right button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- 왼쪽 소개 영역 -->
+    <div class="left">
+      <h1>📘 OCR Book Collection</h1>
+      <p>
+        이미지 속 글자를 자동으로 인식하고 번역까지 해주는<br>
+        AI 기반 OCR 플랫폼입니다.
+      </p>
+      <ul>
+        <li>이미지 업로드만으로 텍스트 추출</li>
+        <li>자동 번역으로 빠른 이해</li>
+        <li>책 단위 컬렉션으로 정리</li>
+        <li>Kakao Cloud에서 안전하게 저장</li>
+      </ul>
+    </div>
+
+    <!-- 오른쪽 로그인 영역 -->
+    <div class="right">
+      <h2>🔑 로그인</h2>
+      <form method="POST">
+        <input type="email" name="email" placeholder="이메일을 입력하세요" required>
+        <input type="password" name="password" placeholder="비밀번호를 입력하세요" required>
+        <button type="submit">로그인</button>
+      </form>
+
+      <div class="footer-text">
+        아직 계정이 없으신가요? <a href="{{ url_for('register') }}">회원가입</a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

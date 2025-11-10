@@ -1,0 +1,107 @@
+{% extends "layout.html" %}
+{% block content %}
+<style>
+  .collections-container {
+    padding: 30px 40px;
+  }
+
+  .collections-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+  }
+
+  .collections-header h2 {
+    font-size: 24px;
+    color: #1f2937;
+  }
+
+  .add-btn {
+    text-decoration: none;
+    background-color: #007bff;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: background 0.2s;
+  }
+
+  .add-btn:hover {
+    background-color: #0056b3;
+  }
+
+  .collections-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 25px;
+  }
+
+  .collection-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+    width: 300px;
+    padding: 25px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .collection-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 5px 16px rgba(0,0,0,0.08);
+  }
+
+  .collection-card h3 {
+    color: #007bff;
+    margin-bottom: 10px;
+  }
+
+  .collection-card p {
+    color: #555;
+    font-size: 14px;
+    margin-bottom: 15px;
+  }
+
+  .collection-card small {
+    color: #888;
+    display: block;
+    margin-bottom: 15px;
+  }
+
+  .open-btn {
+    display: inline-block;
+    text-decoration: none;
+    background: #007bff;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 5px;
+    font-size: 13px;
+  }
+
+  .open-btn:hover {
+    background: #0056b3;
+  }
+</style>
+
+<div class="collections-container">
+  <div class="collections-header">
+    <h2>📚 내 컬렉션</h2>
+    <a href="{{ url_for('add_collection') }}" class="add-btn">➕ 새 컬렉션 추가</a>
+  </div>
+
+  {% if collections %}
+    <div class="collections-grid">
+      {% for c in collections %}
+      <div class="collection-card">
+        <h3>{{ c.name }}</h3>
+        <p>{{ c.description or '설명이 없습니다.' }}</p>
+        <small>📅 {{ c.created_at }}</small>
+        <a href="{{ url_for('list_images') }}?collection_id={{ c.id }}" class="open-btn">📖 열기</a>
+      </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p>아직 생성된 컬렉션이 없습니다. ➕ 버튼을 눌러 새 컬렉션을 만들어보세요.</p>
+  {% endif %}
+</div>
+{% endblock %}

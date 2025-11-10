@@ -1,0 +1,130 @@
+{% extends "layout.html" %}
+{% block content %}
+<style>
+  .dashboard {
+    text-align: center;
+    padding: 60px 30px;
+    animation: fadeIn 0.5s ease-in-out;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .dashboard h2 {
+    font-size: 28px;
+    margin-bottom: 10px;
+    color: #1f2937;
+  }
+
+  .dashboard p.subtitle {
+    color: #555;
+    font-size: 16px;
+    margin-bottom: 50px;
+  }
+
+  .feature-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 25px;
+  }
+
+  .card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    width: 280px;
+    padding: 30px 20px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 8px 18px rgba(0,0,0,0.1);
+  }
+
+  .card h3 {
+    color: #007bff;
+    font-size: 20px;
+    margin-bottom: 12px;
+  }
+
+  .card p {
+    color: #555;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .btn-main {
+    display: inline-block;
+    margin-top: 40px;
+    padding: 12px 24px;
+    background: #007bff;
+    color: white;
+    border-radius: 8px;
+    font-size: 15px;
+    text-decoration: none;
+    transition: background 0.2s;
+  }
+
+  .btn-main:hover {
+    background: #0056b3;
+  }
+
+  .intro-section {
+    background: linear-gradient(135deg, #e0f2fe, #f5f9ff);
+    border-radius: 16px;
+    padding: 40px;
+    margin-bottom: 50px;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+  }
+
+  .intro-section h3 {
+    color: #007bff;
+    margin-bottom: 10px;
+  }
+
+  .intro-section p {
+    color: #444;
+    line-height: 1.7;
+    max-width: 700px;
+    margin: 0 auto;
+  }
+</style>
+
+<div class="dashboard">
+  <h2>👋 {{ session.email }}님, 환영합니다!</h2>
+  <p class="subtitle">이곳은 당신의 개인 OCR & 번역 대시보드입니다.</p>
+
+  <div class="intro-section">
+    <h3>📘 OCR Book Collection 이란?</h3>
+    <p>
+      이미지 속 텍스트를 인식(OCR)하고 번역까지 자동으로 처리하는 시스템입니다.<br>
+      책, 문서, 필기, 노트 등 원하는 자료를 업로드하면 AI가 글자를 추출하고 번역해줍니다.<br>
+      또한, 작품이나 책 단위로 <b>컬렉션</b>을 만들어 관리할 수 있습니다.
+    </p>
+  </div>
+
+  <div class="feature-grid">
+    <div class="card">
+      <h3>📚 내 컬렉션</h3>
+      <p>‘어린왕자’, ‘백설공주’ 등 책 단위로 컬렉션을 만들고<br>각 페이지별로 OCR 결과를 관리하세요.</p>
+      <a href="{{ url_for('list_collections') }}" class="btn-main">컬렉션 보기</a>
+    </div>
+
+    <div class="card">
+      <h3>📤 이미지 업로드</h3>
+      <p>OCR로 인식할 이미지를 업로드하고<br>자동 번역까지 한 번에 진행할 수 있습니다.</p>
+      <a href="{{ url_for('upload_page') }}" class="btn-main">이미지 업로드</a>
+    </div>
+
+    <div class="card">
+      <h3>📋 OCR 결과 리스트</h3>
+      <p>OCR 및 번역된 결과를 한눈에 확인하고<br>직접 수정도 가능합니다.</p>
+      <a href="{{ url_for('list_images') }}" class="btn-main">결과 보기</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

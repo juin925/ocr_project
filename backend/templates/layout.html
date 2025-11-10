@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ title or "OCR Book Collection" }}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Noto Sans KR", sans-serif;
+        }
+
+        body {
+            display: flex;
+            min-height: 100vh;
+            background-color: #f9fafb;
+        }
+
+        /* 사이드바 */
+        .sidebar {
+            width: 230px;
+            background-color: #ffffff;
+            border-right: 1px solid #e5e7eb;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 2px 0 8px rgba(0,0,0,0.05);
+        }
+
+        .sidebar-top {
+            padding: 25px 20px;
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: bold;
+            color: #007bff;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .nav-links {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #374151;
+            padding: 10px 14px;
+            border-radius: 8px;
+            transition: background 0.2s, color 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 15px;
+        }
+
+        .nav-links a:hover {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .nav-links a.active {
+            background-color: #007bff;
+            color: white;
+            font-weight: 600;
+        }
+
+        /* 하단 로그아웃/로그인 영역 */
+        .sidebar-bottom {
+            padding: 20px;
+            border-top: 1px solid #e5e7eb;
+            text-align: center;
+        }
+
+        .sidebar-bottom a {
+            text-decoration: none;
+            color: #007bff;
+            font-size: 14px;
+        }
+
+        .sidebar-bottom a:hover {
+            text-decoration: underline;
+        }
+
+        /* 메인 콘텐츠 */
+        .main {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+        }
+
+        header {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 25px;
+            color: #1f2937;
+        }
+
+        @media (max-width: 900px) {
+            body {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-around;
+                border-right: none;
+                border-bottom: 1px solid #e5e7eb;
+                padding: 10px 0;
+            }
+            .nav-links {
+                flex-direction: row;
+                gap: 15px;
+            }
+            .main {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="sidebar-top">
+            <div class="logo">📘 OCR Book</div>
+            <nav class="nav-links">
+                <a href="{% if 'user_id' in session %}{{ url_for('dashboard_home') }}{% else %}{{ url_for('home') }}{% endif %}" class="{% if request.endpoint == 'dashboard_home' or request.endpoint == 'home' %}active{% endif %}">🏠 홈으로</a>
+                <a href="{{ url_for('list_collections') }}" class="{% if request.endpoint == 'list_collections' %}active{% endif %}">📚 내 컬렉션</a>
+                <a href="{{ url_for('upload_page') }}" class="{% if request.endpoint == 'upload_page' %}active{% endif %}">📤 이미지 업로드</a>
+                <a href="{{ url_for('list_images') }}" class="{% if request.endpoint == 'list_images' %}active{% endif %}">📋 전체 리스트</a>
+            </nav>
+        </div>
+
+        <div class="sidebar-bottom">
+            {% if 'user_id' in session %}
+                <div style="font-size:13px; color:#555; margin-bottom:8px;">
+                    {{ session.email }}
+                </div>
+                <a href="{{ url_for('logout') }}">🚪 로그아웃</a>
+            {% else %}
+                <a href="{{ url_for('login') }}">🔑 로그인</a> |
+                <a href="{{ url_for('register') }}">📝 회원가입</a>
+            {% endif %}
+        </div>
+    </aside>
+
+    <main class="main">
+        {% if header_title %}
+        <header>{{ header_title }}</header>
+        {% endif %}
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>

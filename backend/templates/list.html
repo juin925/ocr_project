@@ -1,0 +1,272 @@
+{% extends "layout.html" %}
+{% block content %}
+<style>
+  .list-container {
+    padding: 30px 40px;
+  }
+
+  h2 {
+    color: #1f2937;
+    margin-bottom: 25px;
+  }
+
+  .card-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 25px;
+  }
+
+  .ocr-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+    width: 360px;
+    padding: 20px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .ocr-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+  }
+
+  img {
+    width: 100%;
+    border-radius: 10px;
+    margin-bottom: 15px;
+  }
+
+  .meta {
+    color: #666;
+    font-size: 13px;
+    margin-bottom: 10px;
+  }
+
+  .section-title {
+    font-weight: bold;
+    color: #333;
+    margin-top: 8px;
+  }
+
+  .text-box {
+    background: #f9fafb;
+    border-radius: 6px;
+    padding: 8px;
+    font-size: 14px;
+    color: #333;
+    min-height: 50px;
+    max-height: 120px; /* 🔹 처음엔 일정 높이까지만 표시 */
+    overflow: hidden;
+    position: relative;
+    white-space: pre-line;
+    transition: max-height 0.3s ease;
+  }
+
+  .text-box.expanded {
+    max-height: none; /* 🔹 “더보기” 눌렀을 때 전체 표시 */
+  }
+
+  .expand-btn {
+    background: none;
+    border: none;
+    color: #007bff;
+    font-size: 13px;
+    cursor: pointer;
+    margin-top: 5px;
+    text-decoration: underline;
+  }
+
+  textarea.ocr-edit {
+    width: 100%;
+    height: 100px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 8px;
+    margin-top: 5px;
+    font-size: 14px;
+    display: none;
+  }
+
+  .btn-group {
+    margin-top: 10px;
+  }
+
+  .btn {
+    display: inline-block;
+    padding: 6px 10px;
+    border: none;
+    border-radius: 6px;
+    font-size: 13px;
+    color: white;
+    cursor: pointer;
+    text-decoration: none;
+    margin-right: 5px;
+  }
+
+  .btn-ocr { background: #007bff; }
+  .btn-translate { background: #22c55e; }
+  .btn-edit { background: #f59e0b; }
+  .btn-save { background: #16a34a; }
+  .btn-cancel { background: #6b7280; }
+  .btn:hover { opacity: 0.9; }
+</style>
+
+<div class="list-container">
+  <h2>📋 OCR & 번역 결과 리스트</h2>
+
+  {% if images %}
+  <div class="card-grid">
+    {% for img in images %}
+    <div class="ocr-card" data-id="{{ img.id }}">
+      {% if img.image_path %}
+      <img src="{{ img.image_path }}" alt="이미지">
+      {% endif %}
+      <div class="meta">📅 {{ img.created_at }} | 상태: {{ img.status }}</div>
+
+      <div class="section-title">🧠 OCR 결과</div>
+      <div class="text-box ocr-text" id="ocr-{{ img.id }}">{{ img.ocr_text if img.ocr_text else '--- (아직 OCR 미완료)' }}</div>
+      <button class="expand-btn" data-target="ocr-{{ img.id }}">🔽 더보기</button>
+
+      <textarea class="ocr-edit" id="edit-{{ img.id }}">{{ img.ocr_text }}</textarea>
+
+      <div class="btn-group">
+        <button class="btn btn-edit" data-id="{{ img.id }}">✏️ 수정</button>
+        <button class="btn btn-save" data-id="{{ img.id }}" style="display:none;">💾 저장</button>
+        <button class="btn btn-cancel" data-id="{{ img.id }}" style="display:none;">취소</button>
+      </div>
+
+      <div class="section-title">🌐 번역 결과</div>
+      <div class="text-box trans-text" id="trans-{{ img.id }}">{{ img.translated_text if img.translated_text else '--- (아직 번역 미완료)' }}</div>
+      <button class="expand-btn" data-target="trans-{{ img.id }}">🔽 더보기</button>
+
+      <div class="btn-group">
+        <button class="btn btn-ocr" data-id="{{ img.id }}">🧠 OCR 다시 실행</button>
+        <button class="btn btn-translate" data-id="{{ img.id }}">🌐 번역</button>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+    <p>아직 업로드된 이미지가 없습니다. 📤 업로드 페이지에서 이미지를 등록하세요.</p>
+  {% endif %}
+</div>
+
+<script>
+  async function callApi(url, method = 'GET', body = null) {
+    const opts = { method };
+    if (body) {
+      opts.headers = { 'Content-Type': 'application/json' };
+      opts.body = JSON.stringify(body);
+    }
+    const res = await fetch(url, opts);
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(text);
+    }
+    return res.json();
+  }
+
+  // 🔽 “더보기 / 접기” 버튼 토글
+  document.querySelectorAll('.expand-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const targetId = btn.dataset.target;
+      const box = document.getElementById(targetId);
+      box.classList.toggle('expanded');
+      btn.textContent = box.classList.contains('expanded') ? '🔼 접기' : '🔽 더보기';
+    });
+  });
+
+  // OCR 실행
+  document.querySelectorAll('.btn-ocr').forEach(btn => {
+    btn.addEventListener('click', async e => {
+      e.preventDefault();
+      const id = btn.dataset.id;
+      btn.disabled = true;
+      btn.textContent = '🧠 OCR 중...';
+      try {
+        await callApi(`/ocr/${id}`);
+        alert('✅ OCR 완료되었습니다!');
+        window.location.reload();
+      } catch (err) {
+        alert('❌ 오류: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '🧠 OCR 다시 실행';
+      }
+    });
+  });
+
+  // 번역 실행
+  document.querySelectorAll('.btn-translate').forEach(btn => {
+    btn.addEventListener('click', async e => {
+      e.preventDefault();
+      const id = btn.dataset.id;
+      btn.disabled = true;
+      btn.textContent = '🌐 번역 중...';
+      try {
+        await callApi(`/translate/${id}`);
+        alert('✅ 번역 완료되었습니다!');
+        window.location.reload();
+      } catch (err) {
+        alert('❌ 오류: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '🌐 번역';
+      }
+    });
+  });
+
+  // 수정 버튼
+  document.querySelectorAll('.btn-edit').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.id;
+      const textBox = document.getElementById(`ocr-${id}`);
+      const textarea = document.getElementById(`edit-${id}`);
+      const saveBtn = document.querySelector(`.btn-save[data-id="${id}"]`);
+      const cancelBtn = document.querySelector(`.btn-cancel[data-id="${id}"]`);
+      btn.style.display = 'none';
+      textBox.style.display = 'none';
+      textarea.style.display = 'block';
+      saveBtn.style.display = 'inline-block';
+      cancelBtn.style.display = 'inline-block';
+    });
+  });
+
+  // 취소 버튼
+  document.querySelectorAll('.btn-cancel').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.id;
+      const textBox = document.getElementById(`ocr-${id}`);
+      const textarea = document.getElementById(`edit-${id}`);
+      const editBtn = document.querySelector(`.btn-edit[data-id="${id}"]`);
+      const saveBtn = document.querySelector(`.btn-save[data-id="${id}"]`);
+      textarea.style.display = 'none';
+      textBox.style.display = 'block';
+      editBtn.style.display = 'inline-block';
+      saveBtn.style.display = 'none';
+      btn.style.display = 'none';
+    });
+  });
+
+  // 저장 버튼
+  document.querySelectorAll('.btn-save').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const id = btn.dataset.id;
+      const textarea = document.getElementById(`edit-${id}`);
+      const newText = textarea.value;
+      btn.disabled = true;
+      btn.textContent = '💾 저장 중...';
+      try {
+        await callApi(`/update_ocr/${id}`, 'POST', { ocr_text: newText });
+        alert('✅ 수정이 완료되었습니다!');
+        window.location.reload();
+      } catch (err) {
+        alert('❌ 오류: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '💾 저장';
+      }
+    });
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,74 @@
+{% extends "layout.html" %}
+{% block content %}
+<style>
+  .upload-container {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    padding: 40px;
+    margin: 40px auto;
+    max-width: 600px;
+    text-align: center;
+  }
+
+  h2 {
+    color: #1f2937;
+    margin-bottom: 25px;
+  }
+
+  form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+  }
+
+  select, input[type="file"] {
+    width: 100%;
+    max-width: 400px;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 15px;
+  }
+
+  button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 20px;
+    font-size: 15px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  button:hover {
+    background-color: #0056b3;
+  }
+
+  .note {
+    color: #666;
+    font-size: 13px;
+    margin-top: 10px;
+  }
+</style>
+
+<div class="upload-container">
+  <h2>📤 이미지 업로드</h2>
+  <form method="POST" enctype="multipart/form-data">
+    <label for="collection">📚 컬렉션 선택</label>
+    <select name="collection_id" id="collection" required>
+      <option value="">선택하세요</option>
+      {% for c in collections %}
+      <option value="{{ c.id }}">{{ c.name }}</option>
+      {% endfor %}
+    </select>
+
+    <input type="file" name="image" accept="image/*" required>
+    <button type="submit">업로드</button>
+  </form>
+
+  <p class="note">JPG, PNG 등 이미지 파일을 업로드하면 OCR 및 번역 처리가 가능합니다.</p>
+</div>
+{% endblock %}

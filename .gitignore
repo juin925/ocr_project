@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+venv/
+.env/
+
+# Flask
+instance/
+*.db
+*.sqlite3
+*.log
+
+# Static files
+static/uploads/
+static/category/
+
+# VSCode / IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Archive files
+*.zip
+*.tar
+*.gz
