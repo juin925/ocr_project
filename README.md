@@ -100,7 +100,7 @@ Client ──► HTTPS(443)
 | **Infra** | Docker, Docker Compose |
 | **Proxy / LB** | Nginx + HTTPS (Let's Encrypt) |
 | **CI/CD** | GitHub Actions + Docker Hub + SSH 자동 배포 |
-| **Cloud Infra** | Kakao Cloud VM + Bastion + Private DB |
+| **Cloud Infra** | Kakao Cloud VM + Bastion + AppSvr + Private DB |
 | **Logging** | /home/ubuntu/ocr_project/logs (배포 로그 저장소) |
 
 ---
@@ -246,6 +246,10 @@ echo "✅ [$(date)] Deploy completed" >> $LOG_DIR/deploy_update.log
 | ☁️ **1단계** | Kubernetes로 Flask 컨테이너 오토스케일링 |
 | 🔗 **2단계** | Prometheus + Grafana 로 리소스 모니터링 |
 | 🧩 **3단계** | Kakao Cloud 멀티존 배포 실험 |
+
+---
+
+**아직 진행되고 있는 미완료 프로젝트이므로 추가되는대로 README.md 업데이트 예정**
 
 ---
 
