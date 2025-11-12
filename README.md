@@ -1,88 +1,250 @@
-# 📘 Book OCR & English Translation Service  
-AI 기반 책 이미지 OCR + 자동 번역 시스템  
+# 📘 Book OCR & Translation Platform  
+AI 기반 OCR + 자동 번역 + Docker CI/CD 클라우드 배포 시스템  
 
 ![Python](https://img.shields.io/badge/Python-3.10-blue)
 ![Flask](https://img.shields.io/badge/Flask-Framework-lightgrey)
 ![EasyOCR](https://img.shields.io/badge/EasyOCR-Text%20Recognition-orange)
 ![Googletrans](https://img.shields.io/badge/Googletrans-Auto%20Translation-green)
 ![MySQL](https://img.shields.io/badge/Database-MySQL-blue)
+![Nginx](https://img.shields.io/badge/Proxy-Nginx-green)
 ![Docker](https://img.shields.io/badge/Container-Docker-informational)
-![Kubernetes](https://img.shields.io/badge/Deployment-Kubernetes-lightblue)
+![GitHubActions](https://img.shields.io/badge/CI/CD-GitHub_Actions-lightblue)
+![SSL](https://img.shields.io/badge/Security-HTTPS%20%2F%20Certbot-yellow)
 ![License](https://img.shields.io/badge/license-MIT-yellow)
 
 ---
 
 ## 📖 목차
 1. [프로젝트 개요](#-프로젝트-개요)
-2. [주요 기능](#-주요-기능)
-3. [기술 스택](#-기술-스택)
-4. [프로젝트 구조](#-프로젝트-구조)
-5. [환경 설정](#-환경-설정)
-6. [Docker 실행법](#-docker-실행법)
-7. [API 라우트](#-api-라우트)
-8. [보안 설계](#-보안-설계)
-9. [향후 계획](#-향후-계획)
+2. [아키텍처 개요](#-아키텍처-개요)
+3. [핵심 기능](#-핵심-기능)
+4. [기술 스택](#-기술-스택)
+5. [디렉토리 구조](#-디렉토리-구조)
+6. [환경 구성](#-환경-구성)
+7. [CI/CD 파이프라인](#-cicd-파이프라인)
+8. [보안 및 인증서 구성](#-보안-및-인증서-구성)
+9. [향후 계획 (클라우드 확장)](#-향후-계획)
 10. [개발자](#-개발자)
 
 ---
 
 ## 📖 프로젝트 개요
-이 서비스는 **사용자가 촬영하거나 스캔한 책 이미지를 업로드하면**,  
-AI 기반 **OCR 기술(EasyOCR)** 로 텍스트를 추출하고 **Googletrans API**를 사용하여 영어로 번역하는 **웹 기반 번역 플랫폼**입니다.
+**Book OCR & Translation Platform**은  
+사용자가 업로드한 **책/문서 이미지**에서  
+AI 기반 **OCR(EasyOCR)** 기술로 텍스트를 추출하고,  
+**Googletrans**를 통해 영어로 자동 번역하는  
+클라우드 기반 웹 플랫폼입니다.
 
-> 🎯 목표:  
-> - 수작업 번역 시간을 줄이고,  
-> - 시각적으로 불편한 사용자도 책 내용을 손쉽게 접근하도록 돕는 것.
+> 🎯 **개발 목적**
+> - OCR + 번역 파이프라인을 하나의 웹 서비스로 통합  
+> - 클라우드 환경에서 확장 가능한 MSA 기반 구조 설계  
+> - CI/CD 자동 배포까지 포함한 실무형 DevOps 아키텍처 구축
 
 ---
 
-## 🚀 주요 기능
+## ☁️ 아키텍처 개요
+
+```bash
+[GitHub] ──► [GitHub Actions (CI)] ──► [Docker Hub]
+                                         │
+                                         ▼
+[App Server: Flask x3] ◄─ Nginx (Load Balancer) ─► HTTPS(443)
+       │
+       ▼
+[MySQL Database Server]
+```
+
+| 구성요소 | 설명 |
+|-----------|------|
+| **Flask (App)** | OCR/번역/DB 처리 담당, 3개 컨테이너로 스케일 아웃 |
+| **Nginx** | 로드밸런서 + 리버스 프록시 + HTTPS 인증서 관리 |
+| **Docker Compose** | 멀티컨테이너 앱 통합 실행 |
+| **GitHub Actions** | 빌드 → 테스트 → Docker Hub 푸시 자동화 (CI) |
+| **deploy_update.sh** | 서버 자동 배포 스크립트 (CD 트리거) |
+| **Certbot** | SSL 인증서 자동 갱신 (HTTPS 보안 통신) |
+
+---
+
+## 🚀 핵심 기능
 
 | 기능 | 설명 |
 |------|------|
-| 🧠 **OCR 텍스트 인식** | EasyOCR을 사용해 이미지 내 한글 텍스트 추출 |
-| 🌐 **자동 번역** | Googletrans로 영어 번역 수행 |
-| 📤 **이미지 업로드** | 책/문서 이미지 업로드 및 미리보기 |
-| 📚 **컬렉션 관리** | 책 단위로 이미지 그룹화 및 저장 |
-| ✏️ **OCR 결과 수정** | 인식된 텍스트를 사용자가 직접 편집 가능 |
-| 💾 **DB 저장** | 이미지, 텍스트, 번역 결과를 MySQL DB에 저장 |
-| 🔒 **사용자 관리** | 회원가입, 로그인, 세션 유지 |
-| ☁️ **배포 준비 완료** | Docker 기반 클라우드 배포 (Kubernetes 확장 예정) |
+| 🧠 **OCR 인식** | EasyOCR로 이미지 내 텍스트 자동 추출 |
+| 🌐 **자동 번역** | Googletrans API로 영어 번역 수행 |
+| 📤 **이미지 업로드** | Jinja2 기반 업로드 및 미리보기 |
+| 📚 **컬렉션 관리** | 책 단위로 OCR 이미지 그룹화 |
+| ✏️ **OCR 결과 수정** | 추출된 텍스트를 직접 수정 및 재저장 |
+| 💾 **MySQL 연동** | OCR, 번역 결과를 DB에 저장 |
+| 🔒 **사용자 인증** | 회원가입 / 로그인 / 세션 유지 |
+| ☁️ **로드밸런싱** | Nginx → Flask 앱 서버 3개로 트래픽 분산 |
+| ⚙️ **CI/CD 자동화** | GitHub push → Docker Hub → 서버 자동배포 |
 
 ---
 
 ## 🧩 기술 스택
 
-| 구분 | 사용 기술 |
-|------|-------------|
-| **Backend** | Flask (Python 3.10) |
-| **OCR Engine** | EasyOCR |
-| **Translation** | Googletrans |
+| 구분 | 기술 |
+|------|------|
+| **Language / Framework** | Python 3.10 / Flask |
+| **OCR & Translation** | EasyOCR, Googletrans |
 | **Database** | MySQL 8.0 |
-| **Frontend** | HTML / CSS (Jinja2 템플릿) |
+| **Frontend** | HTML5, CSS3 (Jinja2 템플릿) |
 | **Infra** | Docker, Docker Compose |
-| **Cloud (Next)** | Kakao Cloud / AWS (Kubernetes 예정) |
+| **Proxy / LB** | Nginx + HTTPS (Let's Encrypt) |
+| **CI/CD** | GitHub Actions + Docker Hub + SSH 자동 배포 |
+| **Cloud Infra** | Kakao Cloud VM + Bastion + Private DB |
+| **Logging** | /home/ubuntu/ocr_project/logs (배포 로그 저장소) |
 
 ---
 
-## 🏗️ 프로젝트 구조
+## 🏗️ 디렉토리 구조
 
+```bash
 ocr_project/
 ├── backend/
-│ ├── app.py
-│ ├── Dockerfile
-│ ├── requirements.txt
-│ ├── .env
-│ ├── static/
-│ │ └── uploads/
-│ └── templates/
-│ ├── layout.html
-│ ├── home.html
-│ ├── login.html
-│ ├── register.html
-│ ├── dashboard_home.html
-│ ├── collections.html
-│ ├── add_collection.html
-│ ├── upload.html
-│ └── list.html
-└── docker-compose.yml
+│   ├── app.py
+│   ├── Dockerfile
+│   ├── requirements.txt
+│   ├── .env
+│   ├── static/
+│   │   └── uploads/
+│   └── templates/
+│       ├── layout.html
+│       ├── home.html
+│       ├── login.html
+│       ├── register.html
+│       ├── dashboard_home.html
+│       ├── collections.html
+│       ├── add_collection.html
+│       ├── upload.html
+│       └── list.html
+│
+├── nginx/
+│   └── nginx.conf
+│
+├── logs/
+│   └── deploy_update.log
+│
+├── deploy_update.sh
+├── docker-compose.yml
+└── .github/
+    └── workflows/
+        └── docker-ci.yml
+```
+
+---
+
+## ⚙️ 환경 구성
+
+### 🔧 .env (환경 변수)
+```bash
+DB_HOST=10.0.113.21
+DB_USER=ocr_user
+DB_PASSWORD=1234
+DB_NAME=book_ocr
+SECRET_KEY=secret_key_ocr_project_123
+```
+
+### 🧱 Docker Compose (요약)
+```yaml
+services:
+  ocr_app1~3:
+    image: juin925/ocr_project:latest
+    ports:
+      - "5000:5000" / "5001:5000" / "5002:5000"
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+      - "443:443"
+```
+
+---
+
+## ⚙️ CI/CD 파이프라인
+
+### 📄 `.github/workflows/docker-ci.yml`
+```yaml
+name: Build, Push, and Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build & Push
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile
+          push: true
+          tags: juin925/ocr_project:latest
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            cd /home/ubuntu
+            ./deploy_update.sh
+```
+
+### 📜 `deploy_update.sh`
+```bash
+#!/bin/bash
+LOG_DIR="/home/ubuntu/ocr_project/logs"
+mkdir -p $LOG_DIR
+
+echo "🔄 [$(date)] Deploy script started" >> $LOG_DIR/deploy_update.log
+sudo docker pull juin925/ocr_project:latest >> $LOG_DIR/deploy_update.log 2>&1
+cd /home/ubuntu/ocr_project
+sudo docker compose down >> $LOG_DIR/deploy_update.log 2>&1
+sudo docker compose up -d >> $LOG_DIR/deploy_update.log 2>&1
+echo "✅ [$(date)] Deploy completed" >> $LOG_DIR/deploy_update.log
+```
+
+---
+
+## 🔒 보안 및 인증서 구성
+
+| 항목 | 내용 |
+|------|------|
+| **HTTPS 적용** | Certbot + Let's Encrypt |
+| **도메인** | `juin.kakaolab.cloud` |
+| **SSL 경로** | `/etc/letsencrypt/live/juin.kakaolab.cloud/` |
+| **자동 갱신** | `certbot renew` (cron 자동화) |
+| **Bastion Host** | 프라이빗 DB 접근용 중간 게이트웨이 구성 |
+
+---
+
+## 🌍 향후 계획
+| 단계 | 목표 |
+|------|------|
+| ☁️ **1단계** | Kubernetes로 Flask 컨테이너 오토스케일링 |
+| 🔗 **2단계** | Prometheus + Grafana 로 리소스 모니터링 |
+| 🧩 **3단계** | Kakao Cloud / AWS 멀티존 배포 실험 |
+| 🔒 **4단계** | HTTPS 자동 인증서 롤링 (Zero Downtime) |
+| 🧠 **5단계** | OCR 모델 Fine-tuning + GPU Serving 환경 구성 |
+
+---
+
+## 👨‍💻 개발자
+**Hwang Juin (황주인)**  
+📧 juin925@gmail.com  
+🌐 [juin.kakaolab.cloud](http://juin.kakaolab.cloud)  
+💼 관심 분야: Cloud Engineering · DevOps · AIaaS  
