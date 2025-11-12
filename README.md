@@ -3,6 +3,7 @@ AI 기반 OCR + 자동 번역 + Docker CI/CD 클라우드 배포 시스템
 
 ![Python](https://img.shields.io/badge/Python-3.10-blue)
 ![Flask](https://img.shields.io/badge/Flask-Framework-lightgrey)
+![Gunicorn](https://img.shields.io/badge/WSGI-Gunicorn-brightgreen)
 ![EasyOCR](https://img.shields.io/badge/EasyOCR-Text%20Recognition-orange)
 ![Googletrans](https://img.shields.io/badge/Googletrans-Auto%20Translation-green)
 ![MySQL](https://img.shields.io/badge/Database-MySQL-blue)
@@ -30,34 +31,40 @@ AI 기반 OCR + 자동 번역 + Docker CI/CD 클라우드 배포 시스템
 
 ## 📖 프로젝트 개요
 **Book OCR & Translation Platform**은  
-사용자가 업로드한 **책/문서 이미지**에서  
 AI 기반 **OCR(EasyOCR)** 기술로 텍스트를 추출하고,  
-**Googletrans**를 통해 영어로 자동 번역하는  
-클라우드 기반 웹 플랫폼입니다.
+**Googletrans**로 영어 번역을 수행하는  
+**Flask + Gunicorn + Nginx** 기반 클라우드 플랫폼입니다.
 
 > 🎯 **개발 목적**
-> - OCR + 번역 파이프라인을 하나의 웹 서비스로 통합  
-> - 클라우드 환경에서 확장 가능한 MSA 기반 구조 설계  
-> - CI/CD 자동 배포까지 포함한 실무형 DevOps 아키텍처 구축
+> - Gunicorn을 통한 안정적인 Flask 프로덕션 배포  
+> - 클라우드 환경에서 확장 가능한 MSA 구조 설계  
+> - CI/CD 자동 배포 포함한 실무형 DevOps 아키텍처 구축
 
 ---
 
 ## ☁️ 아키텍처 개요
 
 ```bash
-[GitHub] ──► [GitHub Actions (CI)] ──► [Docker Hub]
-                                         │
-                                         ▼
-[App Server: Flask x3] ◄─ Nginx (Load Balancer) ─► HTTPS(443)
-       │
-       ▼
-[MySQL Database Server]
+Client ──► HTTPS(443)
+            │
+            ▼
+       [ Nginx (Reverse Proxy + Load Balancer) ]
+            │
+            ▼
+       [ Gunicorn (WSGI Server) ]
+            │
+            ▼
+       [ Flask (OCR & Translation Logic) ]
+            │
+            ▼
+       [ MySQL Database ]
 ```
 
 | 구성요소 | 설명 |
 |-----------|------|
-| **Flask (App)** | OCR/번역/DB 처리 담당, 3개 컨테이너로 스케일 아웃 |
-| **Nginx** | 로드밸런서 + 리버스 프록시 + HTTPS 인증서 관리 |
+| **Flask (App)** | OCR/번역/DB 처리 담당, Gunicorn으로 실행 |
+| **Gunicorn** | Flask 앱을 WSGI 방식으로 멀티 워커로 운영 |
+| **Nginx** | 리버스 프록시 + HTTPS 인증서 관리 + 로드밸런싱 |
 | **Docker Compose** | 멀티컨테이너 앱 통합 실행 |
 | **GitHub Actions** | 빌드 → 테스트 → Docker Hub 푸시 자동화 (CI) |
 | **deploy_update.sh** | 서버 자동 배포 스크립트 (CD 트리거) |
@@ -86,6 +93,7 @@ AI 기반 **OCR(EasyOCR)** 기술로 텍스트를 추출하고,
 | 구분 | 기술 |
 |------|------|
 | **Language / Framework** | Python 3.10 / Flask |
+| **WSGI Server** | Gunicorn |
 | **OCR & Translation** | EasyOCR, Googletrans |
 | **Database** | MySQL 8.0 |
 | **Frontend** | HTML5, CSS, JS |
@@ -152,6 +160,7 @@ services:
     image: juin925/ocr_project:latest
     ports:
       - "5000:5000" / "5001:5000" / "5002:5000"
+    command: gunicorn -w 4 -b 0.0.0.0:5000 app:app
   nginx:
     image: nginx:latest
     ports:
