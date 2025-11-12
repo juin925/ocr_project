@@ -1,14 +1,17 @@
 import os
 import uuid
-
 from flask import Flask, request, render_template, redirect, url_for, session, jsonify
 from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
 import pymysql
 import easyocr
 from googletrans import Translator
+from dotenv import load_dotenv
 
 app = Flask(__name__)
+
+# 환경변수
+load_dotenv() 
 
 # 업로드 경로 설정 (절대경로)
 UPLOAD_FOLDER = os.path.join(app.root_path, 'static', 'uploads')
@@ -17,14 +20,14 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # DB 연결 정보
 DB_CONFIG = {
-    'host': '10.0.113.21',
-    'user': 'ocr_user',
-    'password': '1234',
-    'database': 'book_ocr',
+    'host': os.getenv('DB_HOST'),
+    'user': os.getenv('DB_USER'),
+    'password': os.getenv('DB_PASSWORD'),
+    'database': os.getenv('DB_NAME'),
     'cursorclass': pymysql.cursors.DictCursor
 }
 
-app.secret_key = 'secret_key_ocr_project_123'  # 세션용 비밀키
+app.secret_key = os.getenv('SECRET_KEY')  # 세션용 비밀키
 
 
 # ------------------ 회원가입 ------------------
