@@ -71,12 +71,12 @@ AI 기반 **OCR(EasyOCR)** 기술로 텍스트를 추출하고,
 |------|------|
 | 🧠 **OCR 인식** | EasyOCR로 이미지 내 텍스트 자동 추출 |
 | 🌐 **자동 번역** | Googletrans API로 영어 번역 수행 |
-| 📤 **이미지 업로드** | Jinja2 기반 업로드 및 미리보기 |
+| 📤 **이미지 업로드** | 업로드 및 미리보기 |
 | 📚 **컬렉션 관리** | 책 단위로 OCR 이미지 그룹화 |
 | ✏️ **OCR 결과 수정** | 추출된 텍스트를 직접 수정 및 재저장 |
 | 💾 **MySQL 연동** | OCR, 번역 결과를 DB에 저장 |
 | 🔒 **사용자 인증** | 회원가입 / 로그인 / 세션 유지 |
-| ☁️ **로드밸런싱** | Nginx → Flask 앱 서버 3개로 트래픽 분산 |
+| ☁️ **로드밸런싱** | Nginx → Gunicorn → Flask 앱 서버 3개로 트래픽 분산 |
 | ⚙️ **CI/CD 자동화** | GitHub push → Docker Hub → 서버 자동배포 |
 
 ---
@@ -88,7 +88,7 @@ AI 기반 **OCR(EasyOCR)** 기술로 텍스트를 추출하고,
 | **Language / Framework** | Python 3.10 / Flask |
 | **OCR & Translation** | EasyOCR, Googletrans |
 | **Database** | MySQL 8.0 |
-| **Frontend** | HTML5, CSS3 (Jinja2 템플릿) |
+| **Frontend** | HTML5, CSS, JS |
 | **Infra** | Docker, Docker Compose |
 | **Proxy / LB** | Nginx + HTTPS (Let's Encrypt) |
 | **CI/CD** | GitHub Actions + Docker Hub + SSH 자동 배포 |
@@ -138,11 +138,11 @@ ocr_project/
 
 ### 🔧 .env (환경 변수)
 ```bash
-DB_HOST=10.0.113.21
-DB_USER=ocr_user
-DB_PASSWORD=1234
-DB_NAME=book_ocr
-SECRET_KEY=secret_key_ocr_project_123
+DB_HOST=(DB PRIVATE IP)
+DB_USER=(DB USER NAME)
+DB_PASSWORD=(DB PASSWORD)
+DB_NAME=(DB NAME)
+SECRET_KEY=(SECRET_KEY)
 ```
 
 ### 🧱 Docker Compose (요약)
@@ -228,7 +228,6 @@ echo "✅ [$(date)] Deploy completed" >> $LOG_DIR/deploy_update.log
 | **도메인** | `juin.kakaolab.cloud` |
 | **SSL 경로** | `/etc/letsencrypt/live/juin.kakaolab.cloud/` |
 | **자동 갱신** | `certbot renew` (cron 자동화) |
-| **Bastion Host** | 프라이빗 DB 접근용 중간 게이트웨이 구성 |
 
 ---
 
@@ -237,9 +236,7 @@ echo "✅ [$(date)] Deploy completed" >> $LOG_DIR/deploy_update.log
 |------|------|
 | ☁️ **1단계** | Kubernetes로 Flask 컨테이너 오토스케일링 |
 | 🔗 **2단계** | Prometheus + Grafana 로 리소스 모니터링 |
-| 🧩 **3단계** | Kakao Cloud / AWS 멀티존 배포 실험 |
-| 🔒 **4단계** | HTTPS 자동 인증서 롤링 (Zero Downtime) |
-| 🧠 **5단계** | OCR 모델 Fine-tuning + GPU Serving 환경 구성 |
+| 🧩 **3단계** | Kakao Cloud 멀티존 배포 실험 |
 
 ---
 
@@ -247,4 +244,4 @@ echo "✅ [$(date)] Deploy completed" >> $LOG_DIR/deploy_update.log
 **Hwang Juin (황주인)**  
 📧 juin925@gmail.com  
 🌐 [juin.kakaolab.cloud](http://juin.kakaolab.cloud)  
-💼 관심 분야: Cloud Engineering · DevOps · AIaaS  
+💼 관심 분야: Cloud Engineering · DevOps  
