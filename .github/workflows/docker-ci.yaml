@@ -1,9 +1,9 @@
-name: Build and Push to Docker Hub
+name: Build, Push, and Deploy
 
 on:
   push:
     branches:
-      - main   # main 브랜치에 push할 때 실행
+      - main
 
 jobs:
   build:
@@ -29,3 +29,15 @@ jobs:
           file: ./backend/Dockerfile
           push: true
           tags: juin925/ocr_project:latest
+
+      # 4️⃣ 서버에 SSH 접속 후 배포 실행
+      - name: Deploy to Server
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            echo "🚀 Deploying new Docker image..."
+            cd /home/ubuntu
+            ./deploy_update.sh
