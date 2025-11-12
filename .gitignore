@@ -30,3 +30,6 @@ Thumbs.db
 *.gz
 
 .env
+
+logs/*
+!logs/.keep
